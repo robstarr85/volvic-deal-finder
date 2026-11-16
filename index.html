@@ -25,10 +25,14 @@
       <div class="eyebrow">VOLVIC-ANGEBOTE</div>
       <h1>Alle Volvic-Produkte.<br><em>Direkt als Treffer.</em></h1>
       <p>Die App sucht aktuelle Volvic-Aktionen automatisch bei ALDI Süd und zeigt gefundene Angebote hier an.</p>
-      <div class="action-row">
-        <button id="refreshBtn" class="primary">Jetzt nach Angeboten suchen</button>
-        <span id="searchState" class="state" role="status">Noch nicht gesucht</span>
+      <div class="search-row">
+        <label class="search-field">
+          <span>Suchbegriff</span>
+          <input id="searchQuery" type="search" value="Volvic" placeholder="z. B. Volvic Eistee, Volvic Touch …" autocomplete="off">
+        </label>
+        <button id="refreshBtn" class="primary">Suchen</button>
       </div>
+      <div id="searchState" class="state" role="status">Noch nicht gesucht</div>
     </section>
     <section class="panel">
       <div class="section-head">
