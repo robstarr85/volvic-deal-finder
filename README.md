@@ -1,40 +1,32 @@
-# Volvic Deal Finder – kostenlose PWA
+# Volvic Deal Finder – automatische Suche (ALDI Süd)
 
-Installierbare Web-App für Android (Chrome → „Zum Startbildschirm“ / „App installieren“).
+Kostenlose installierbare PWA für Android. Die App sucht beim Öffnen automatisch nach aktiven Volvic-Angeboten. Eine erneute Suche ist über „Jetzt nach Angeboten suchen“ möglich. Erfolgreiche Ergebnisse werden lokal zwischengespeichert; wenn die App erneut geöffnet wird, wird nach 24 Stunden neu gesucht.
 
-## Was funktioniert
-- Anthrazit-, Limettengrün- und Gelb-Design
-- Angebotsliste für alle Volvic-Produkte (z. B. Wasser, aromatisiertes Wasser und Eistee)
-- Such-PLZ und Umkreis lokal speichern
-- Quellenverzeichnis mit allen zehn Händlern
-- Direktlinks zu Prospektseiten und Websuche nach Volvic-Produkten
-- Textprüfung: akzeptiert Belegtexte mit „Volvic“; andere Marken werden ausgeschlossen
-- Manuelles Erfassen bestätigter Angebote mit Preis, Zeitraum, Filiale und Beleg-URL
-- Speicherung aller Angebote ausschließlich im lokalen Browser-Speicher
-- Offline-Cache für die App-Oberfläche
+## Datenquelle und Händlerabdeckung
 
-## Ehrliche Funktionsgrenze
-Diese kostenlose Version lädt die Prospekte nicht automatisch herunter und durchsucht sie nicht selbstständig im Hintergrund. Die Händlerseiten bieten keine einheitliche, nachweislich frei nutzbare Schnittstelle für alle zehn Ketten. Daher öffnet die App die Quellen und ermöglicht die lokale Erfassung nach Prüfung. Sie erfindet keine Treffer. Das ist noch kein vollautomatischer Angebots-Crawler.
+Die App verwendet die kostenlose öffentliche API von **PrijsProfeet**:
+`https://www.prijsprofeet.de/api/v1/search?q=Volvic&retailer=aldi_sued&page_size=100&promotion_status=active`
 
-## Installation auf Android
-Die PWA muss über HTTPS bereitgestellt werden:
-1. Dateien auf einen kostenlosen statischen HTTPS-Host legen (z. B. GitHub Pages).
-2. URL in Chrome auf Android öffnen.
-3. Menü ⋮ → „App installieren“ oder „Zum Startbildschirm hinzufügen“.
+Die aktuelle API-Dokumentation weist Deutschland derzeit ausschließlich mit ALDI Süd aus. Die Suche beschränkt sich deshalb auf ALDI Süd. Andere Händler werden in der App als noch nicht angebunden angezeigt; es werden keine Angebote erfunden.
 
-Alternativ kann `index.html` lokal am PC geprüft werden; PWA-Installation und Service Worker funktionieren lokal nicht zuverlässig ohne HTTPS/localhost.
+PrijsProfeet verlangt bei kostenloser Nutzung eine sichtbare Quellenangabe. Diese ist in der App mit Link enthalten. Die API-Daten sind indikativ und sollen beim Händler geprüft werden.
 
-## Händlerquellen
-- REWE: https://www.rewe.de/angebote/
-- EDEKA: https://www.edeka.de/angebote/
-- Kaufland: https://filiale.kaufland.de/prospekte.html
-- Lidl: https://www.lidl.de/c/online-prospekte/s10005610
-- ALDI Nord: https://www.aldi-nord.de/prospekte.html
-- ALDI Süd: https://www.aldi-sued.de/de/angebote.html
-- Netto Marken-Discount: https://www.netto-online.de/angebote
-- Penny: https://www.penny.de/angebote
-- Norma: https://www.norma-online.de/de/angebote
-- Globus: https://www.globus.de/maerkte/angebote.php
+## Grenzen
 
-## Daten
-Keine Konten, keine Serverdatenbank, keine Drittanbieter-Analyse. Angebote bleiben auf dem jeweiligen Gerät.
+- Keine PLZ-/Umkreissuche: Die deutsche API liefert für diese Angebote keine verlässlichen Filialkoordinaten oder Filialadressen. Deshalb zeigt die App keine erfundenen Filialen oder Entfernungen.
+- Kein verlässlicher Hintergrundlauf, wenn die App geschlossen ist. Die Suche erfolgt beim Öffnen und höchstens einmal pro 24 Stunden automatisch, oder jederzeit manuell über die Schaltfläche.
+- Die App zeigt nur aktive Volvic-Angebote mit Preis. Verfügbarkeit und Gültigkeit richten sich nach den API-Angaben.
+- Der Browser muss den API-Zugriff erlauben (CORS). Falls die API den Browserzugriff blockiert oder nicht erreichbar ist, zeigt die App einen Fehler und gegebenenfalls die zuletzt gespeicherten Treffer.
+
+## Veröffentlichung auf GitHub Pages
+
+1. ZIP entpacken.
+2. Alle Dateien und den Ordner `icons` im Repository hochladen und vorhandene Dateien überschreiben.
+3. `index.html` muss direkt im Repository-Hauptverzeichnis liegen.
+4. Änderungen committen. GitHub Pages veröffentlicht die aktualisierte PWA automatisch.
+
+Nach dem Update die App auf Android einmal vollständig schließen und erneut öffnen. Falls sie noch die alte Oberfläche zeigt, im Chrome-Menü die Website neu laden.
+
+## Installation
+
+Die App über GitHub Pages (HTTPS) in Chrome öffnen und „App installieren“ / „Zum Startbildschirm hinzufügen“ wählen.
