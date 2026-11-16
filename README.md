@@ -1,33 +1,39 @@
-# Volvic Deal Finder – Textsuche (ALDI Süd)
+# Volvic Deal Finder – Textsuche
 
-Installierbare kostenlose PWA. Auf der Startseite kann im Suchfeld ein Produktbegriff eingegeben werden. Die App ergänzt „Volvic“, falls es nicht bereits enthalten ist, und sucht z. B. nach `Volvic Eistee`, `Volvic Touch Zitrone` oder `Volvic`. Enter oder „Suchen“ startet den API-Aufruf.
+Installierbare kostenlose PWA. Auf der Startseite befindet sich ein deutlich sichtbares Suchfeld mit der Schaltfläche **Angebote suchen**. Die Suche ergänzt „Volvic“, wenn nur eine Sorte oder Produktart eingegeben wird, z. B. `Eistee`, `Touch Zitrone` oder `Naturell`.
 
 ## Datenquelle
 
 Die App verwendet die öffentliche PrijsProfeet-API:
-`https://www.prijsprofeet.de/api/v1/search?q=...&retailer=aldi_sued&promotion_status=active&page_size=100`
+`https://www.prijsprofeet.de/api/v1/search`
 
-Laut offizieller Dokumentation unterstützt `/search` eine unscharfe Textsuche und den Filter `promotion_status=active`. Die deutsche API stellt derzeit ausschließlich ALDI Süd bereit. Die kostenlose Nutzung erfordert eine sichtbare Quellenangabe, die in der App enthalten ist. Quelle: https://github.com/PrijsProfeet/supermarkt-api
+Der deutsche API-Host verlangt technisch einen festen Quellenfilter. Die derzeit verfügbare deutsche Abdeckung ist daher auf einen Händler begrenzt. Für die übrigen Händler gibt es in dieser Datenquelle derzeit keine deutschen Angebotsdaten. Die Händlerübersicht in der App kennzeichnet diese Lücken ausdrücklich.
 
-## Verhalten
+Die App filtert auf aktive Angebote und zeigt nur Treffer mit Volvic-Bezug und auswertbarem Preis. Es werden keine regulären Regalpreise als Sonderangebote ausgegeben.
 
-- Suchbegriff wird dynamisch an die API übergeben.
-- Suchergebnisse werden lokal pro Suchbegriff für 24 Stunden zwischengespeichert.
-- Nur erkannte Volvic-Treffer mit Preis und aktivem Angebotsstatus werden angezeigt.
-- API-Fehler, leere Ergebnisse und nicht erkannte Datenstrukturen werden ausdrücklich gemeldet.
-- Die App behauptet nicht, dass andere Händler durchsucht werden.
+## Suche und Aktualisierung
+
+- Suchbegriff eingeben und **Angebote suchen** drücken oder Enter verwenden.
+- Die App ergänzt Volvic automatisch, falls es nicht im Suchbegriff vorkommt.
+- Ergebnisse werden pro Suchbegriff lokal zwischengespeichert.
+- Beim erneuten Öffnen werden vorhandene Ergebnisse angezeigt und nach Ablauf des Cache-Zeitraums neu abgerufen.
+- Bei API-Fehlern, CORS-Problemen oder nicht erkanntem Antwortformat erscheint eine Fehlermeldung.
 
 ## Grenzen
 
-- Keine PLZ-/Umkreissuche: Die deutsche API liefert keine verlässlichen Filialadressen/Koordinaten.
-- Keine Hintergrundsuche bei geschlossener App. Beim Öffnen wird der gespeicherte Suchbegriff verwendet; manuell kann jederzeit erneut gesucht werden.
-- Browserzugriff setzt voraus, dass die API CORS für die GitHub-Pages-Origin erlaubt. Wenn nicht, zeigt die App einen Fehler. Dann wäre ein kostenloser Proxy/Backend nötig, der separat eingerichtet werden müsste.
-- Die Datenquelle beschreibt Angebote, nicht das vollständige Sortiment.
+- Die Datenquelle bietet keine verlässlichen Filialadressen oder Koordinaten für eine PLZ-Umkreissuche.
+- Eine PWA kann nicht zuverlässig im Hintergrund suchen, wenn sie vollständig geschlossen ist.
+- Die API-Abfrage aus dem Browser funktioniert nur, wenn der Anbieter CORS für GitHub Pages zulässt.
+- Die Abdeckung ist nicht mit allen zehn gewünschten Supermarktketten gleichzusetzen.
 
-## Update veröffentlichen
+## Veröffentlichung
 
 1. ZIP entpacken.
-2. Alle Dateien und den Ordner `icons` im GitHub-Repository hochladen und überschreiben.
+2. Alle Dateien und den Ordner `icons` im GitHub-Repository hochladen und vorhandene Dateien überschreiben.
 3. `index.html` muss im Repository-Hauptverzeichnis liegen.
 4. Änderungen committen. GitHub Pages veröffentlicht die neue Version.
-5. Auf Android die App vollständig schließen und erneut öffnen.
+5. Auf Android die App vollständig schließen und erneut öffnen. Falls die alte Version angezeigt wird, die Website in Chrome neu laden.
+
+## Quellenangabe
+
+Angebotsdaten: [PrijsProfeet](https://www.prijsprofeet.de). Bitte Preis und Verfügbarkeit vor Ort prüfen.

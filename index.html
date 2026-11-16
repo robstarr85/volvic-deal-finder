@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#24282b">
-  <meta name="description" content="Automatische Suche nach aktuellen Volvic-Angeboten">
+  <meta name="description" content="Volvic Deal Finder – Suche nach aktuellen Angeboten für alle Volvic-Produkte.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -16,48 +16,47 @@
     <div class="brand-mark">V</div>
     <div class="brand">
       <div class="brand-title">VOLVIC <span>DEAL FINDER</span></div>
-      <div class="tagline">Automatische Angebotssuche</div>
+      <div class="tagline">Angebote finden statt Prospekte öffnen</div>
     </div>
     <button id="installBtn" class="icon-button" hidden aria-label="App installieren">＋</button>
   </header>
   <main>
     <section class="hero">
-      <div class="eyebrow">VOLVIC-ANGEBOTE</div>
-      <h1>Alle Volvic-Produkte.<br><em>Direkt als Treffer.</em></h1>
-      <p>Die App sucht aktuelle Volvic-Aktionen automatisch bei ALDI Süd und zeigt gefundene Angebote hier an.</p>
-      <div class="search-row">
-        <label class="search-field">
-          <span>Suchbegriff</span>
-          <input id="searchQuery" type="search" value="Volvic" placeholder="z. B. Volvic Eistee, Volvic Touch …" autocomplete="off">
+      <div class="eyebrow">PRODUKTSUCHE</div>
+      <h1>Finde deine<br><em>Volvic-Angebote.</em></h1>
+      <p>Gib einen Suchbegriff ein. Die Suche ergänzt Volvic automatisch, wenn du nur eine Sorte oder Produktart eingibst.</p>
+      <form id="searchForm" class="search-form" role="search">
+        <label class="search-field" for="searchQuery">
+          <span>Was möchtest du finden?</span>
+          <input id="searchQuery" name="q" type="search" value="Volvic" placeholder="z. B. Volvic, Eistee, Touch Zitrone" autocomplete="off" aria-label="Suchbegriff">
         </label>
-        <button id="refreshBtn" class="primary">Suchen</button>
-      </div>
-      <div id="searchState" class="state" role="status">Noch nicht gesucht</div>
+        <button id="refreshBtn" class="primary" type="submit">Angebote suchen</button>
+      </form>
+      <div id="searchState" class="state" role="status" aria-live="polite">Bereit für die Suche</div>
     </section>
     <section class="panel">
       <div class="section-head">
-        <div><div class="eyebrow">DEINE TREFFER</div><h2>Aktuelle Angebote <b id="offerCount" class="count">0</b></h2></div>
+        <div><div class="eyebrow">SUCHERGEBNISSE</div><h2>Gefundene Angebote <b id="offerCount" class="count">0</b></h2></div>
       </div>
-      <div id="lastChecked" class="muted tiny">Beim Öffnen der App wird automatisch gesucht.</div>
+      <div id="lastChecked" class="muted tiny">Beim Öffnen der App wird automatisch nach Volvic gesucht.</div>
       <div id="errorBox" class="error-box" hidden></div>
       <div id="offersList" class="offers-list"></div>
       <div id="emptyState" class="empty-state" hidden>
-        <div class="empty-icon">🍋</div>
-        <h3>Keine aktuellen Volvic-Aktionen gefunden</h3>
-        <p>Die Datenquelle meldet derzeit keine passenden aktiven ALDI-Süd-Angebote. Du kannst die Suche jederzeit erneut starten.</p>
+        <div class="empty-icon">🔎</div>
+        <h3>Keine passenden Angebote gefunden</h3>
+        <p>Versuche einen allgemeineren Suchbegriff oder starte die Suche später erneut.</p>
       </div>
-      <div class="note"><strong>Hinweis:</strong> Die Datenquelle liefert derzeit deutsche Angebotsdaten nur für ALDI Süd. Filialgenaue Preise und Entfernungen werden nicht geliefert. Die App erfindet deshalb keine Filiale und keine Entfernung.</div>
-      <div class="attribution">Angebotsdaten: <a href="https://www.prijsprofeet.de" target="_blank" rel="noopener">PrijsProfeet</a> · Preise sind indikativ; bitte im Markt prüfen.</div>
+      <div class="note"><strong>Zur Datenabdeckung:</strong> Die verwendete kostenlose Datenquelle liefert für Deutschland derzeit nur eine begrenzte Händlerabdeckung. Die App zeigt deshalb keine erfundenen Treffer oder Filialangaben.</div>
+      <div class="attribution">Angebotsdaten: <a href="https://www.prijsprofeet.de" target="_blank" rel="noopener">PrijsProfeet</a>. Bitte Preis und Verfügbarkeit vor Ort prüfen.</div>
     </section>
     <section class="panel coverage">
-      <div class="eyebrow">HÄNDLERABDECKUNG</div>
+      <div class="eyebrow">HÄNDLERÜBERSICHT</div>
       <h2>Weitere Märkte</h2>
-      <p class="intro">Diese Händler bleiben vorgemerkt. Eine geeignete kostenlose Datenquelle für deutsche Volvic-Angebote ist derzeit nicht verfügbar.</p>
+      <p class="intro">Diese Händler sind vorgemerkt. Für sie ist in der aktuellen kostenlosen Datenquelle noch kein verlässlicher deutscher Angebotsabruf eingerichtet.</p>
       <div id="retailerList" class="retailer-list"></div>
     </section>
   </main>
-  <footer><span>VOLVIC DEAL FINDER</span><span>Angebote lokal zwischengespeichert</span></footer>
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <footer><span>VOLVIC DEAL FINDER</span><span>Lokaler Ergebniscache</span></footer>
   <script src="app.js"></script>
 </body>
 </html>

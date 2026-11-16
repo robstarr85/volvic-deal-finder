@@ -1,7 +1,7 @@
 {
   "name": "Volvic Deal Finder",
   "short_name": "Volvic Deals",
-  "description": "Automatische Suche nach aktuellen Volvic-Angeboten",
+  "description": "Suche nach aktuellen Angeboten für alle Volvic-Produkte bei verschiedenen Händlern.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

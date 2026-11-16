@@ -15,3 +15,8 @@ button{font:inherit;cursor:pointer}.primary{border:0;border-radius:11px;backgrou
 footer{max-width:760px;margin:0 auto;padding:0 18px 24px;display:flex;justify-content:space-between;gap:10px;color:#8f9b9d;font-size:10px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,20px);background:var(--lime);color:#202528;padding:10px 16px;border-radius:12px;font-size:12px;font-weight:800;opacity:0;pointer-events:none;transition:.2s;z-index:20}[hidden]{display:none!important}
 @media(max-width:480px){main{padding:12px 11px 32px}.hero{padding:18px 15px}.panel{padding:14px}.retailer-row{grid-template-columns:10px 1fr}.retailer-row small{grid-column:2;text-align:left}}
+
+.search-form{display:flex;align-items:end;gap:10px;margin-top:14px}
+.search-form .search-field{flex:1;min-width:180px}
+.search-form .primary{white-space:nowrap;min-height:45px}
+@media(max-width:480px){.search-form{display:grid;grid-template-columns:1fr}.search-form .primary{width:100%}}

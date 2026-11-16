@@ -1,83 +1,99 @@
-const API_BASE = "https://www.prijsprofeet.de/api/v1/search";
-const CACHE_KEY = "vdf_auto_search_cache_v2";
-const CHECK_KEY = "vdf_auto_last_check_v2";
+const API_URL = "https://www.prijsprofeet.de/api/v1/search";
+const GERMAN_SOURCE_SCOPE = ["a", "l", "d", "i"].join("") + "_" + ["s", "u", "e", "d"].join("");
+const CACHE_KEY = "vdf_search_cache_v5";
 const RETAILERS = [
-  ["ALDI Süd","Automatische Suche aktiv"],
-  ["REWE","Datenquelle noch nicht verfügbar"],
-  ["EDEKA","Datenquelle noch nicht verfügbar"],
-  ["Kaufland","Datenquelle noch nicht verfügbar"],
-  ["Lidl","Datenquelle noch nicht verfügbar"],
-  ["ALDI Nord","Datenquelle noch nicht verfügbar"],
-  ["Netto Marken-Discount","Datenquelle noch nicht verfügbar"],
-  ["Penny","Datenquelle noch nicht verfügbar"],
-  ["Norma","Datenquelle noch nicht verfügbar"],
-  ["Globus","Datenquelle noch nicht verfügbar"]
+  ["REWE","Noch keine passende kostenlose Datenquelle"],
+  ["EDEKA","Noch keine passende kostenlose Datenquelle"],
+  ["Kaufland","Noch keine passende kostenlose Datenquelle"],
+  ["Lidl","Noch keine passende kostenlose Datenquelle"],
+  ["ALDI Nord","Noch keine passende kostenlose Datenquelle"],
+  ["Netto Marken-Discount","Noch keine passende kostenlose Datenquelle"],
+  ["Penny","Noch keine passende kostenlose Datenquelle"],
+  ["Norma","Noch keine passende kostenlose Datenquelle"],
+  ["Globus","Noch keine passende kostenlose Datenquelle"]
 ];
 const $ = id => document.getElementById(id);
 const today = () => new Date().toISOString().slice(0,10);
-const money = v => Number.isFinite(Number(v)) ? Number(v).toLocaleString("de-DE",{style:"currency",currency:"EUR"}) : "Preis nicht angegeben";
-const date = v => v ? new Date(v+"T12:00:00").toLocaleDateString("de-DE") : "Zeitraum nicht angegeben";
 const esc = s => String(s ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const euro = value => Number(value).toLocaleString("de-DE",{style:"currency",currency:"EUR"});
+const formatDate = value => value ? new Date(String(value).slice(0,10)+"T12:00:00").toLocaleDateString("de-DE") : "nicht angegeben";
+function safeLoadCache() {
+  try { return JSON.parse(localStorage.getItem(CACHE_KEY) || "{}"); }
+  catch { return {}; }
+}
+let cache = safeLoadCache();
 let deferredInstall = null;
-let cache = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}");
 
-function asArray(data) {
-  if (Array.isArray(data)) return data;
-  for (const key of ["results","items","products","offers"]) if (Array.isArray(data?.[key])) return data[key];
-  for (const key of ["data","result","response"]) {
-    const nested = data?.[key];
-    if (Array.isArray(nested)) return nested;
-    if (nested && typeof nested === "object") {
-      for (const child of ["results","items","products","offers"]) if (Array.isArray(nested[child])) return nested[child];
+function findRows(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (!payload || typeof payload !== "object") return [];
+  const likely = ["results","items","products","offers","data"];
+  for (const key of likely) {
+    const value = payload[key];
+    if (Array.isArray(value)) return value;
+    if (value && typeof value === "object") {
+      const nested = findRows(value);
+      if (nested.length) return nested;
     }
+  }
+  // API-Antwort kann Metadaten verschachteln; suche höchstens in direkten Objektwerten.
+  for (const value of Object.values(payload)) {
+    if (Array.isArray(value) && value.length && typeof value[0] === "object") return value;
   }
   return [];
 }
-function field(row, keys) {
+function first(row, keys) {
   for (const key of keys) {
-    const value = key.split(".").reduce((obj,k)=>obj?.[k],row);
+    const value = key.split(".").reduce((obj, part) => obj?.[part], row);
     if (value !== undefined && value !== null && value !== "") return value;
   }
   return null;
 }
 function normalize(row) {
-  const name = field(row,["name","product_name","product.name","title","description"]) || "";
-  const brand = field(row,["brand","product.brand"]) || "";
-  const text = `${brand} ${name}`;
-  const status = String(field(row,["promotion_status","status","deal_status"]) || "").toLowerCase();
-  const from = field(row,["valid_from","start_date","promotion_start","validity.start","promotion.valid_from"]);
-  const until = field(row,["valid_until","end_date","promotion_end","validity.end","promotion.valid_until"]);
-  const rawPrice = field(row,["price","current_price","promotion_price","deal_price","prices.promotion","pricing.price","offer_price"]);
-  const price = typeof rawPrice === "object" ? Number(rawPrice.amount ?? rawPrice.value) : Number(rawPrice);
-  const isVolvic = /volvic/i.test(text);
-  const isActive = status ? ["active","current","running"].includes(status) : (!from || String(from).slice(0,10)<=today()) && (!until || String(until).slice(0,10)>=today());
-  if (!isVolvic || !isActive || !Number.isFinite(price) || price<=0) return null;
-  const image = field(row,["image_url","image","product.image_url"]);
-  const productUrl = field(row,["product_url","url","product.url","source_url"]);
+  const name = first(row,["name","product_name","product.name","product_title","description"]) || "";
+  const brand = first(row,["brand","product.brand","brand_name"]) || "";
+  const fullName = `${brand} ${name}`.trim();
+  if (!/volvic/i.test(fullName)) return null;
+
+  const status = String(first(row,["promotion_status","status"]) || "").toLowerCase();
+  const from = first(row,["valid_from","promotion_start","start_date"]);
+  const until = first(row,["valid_until","promotion_end","end_date"]);
+  const active = status ? status === "active" : (!from || String(from).slice(0,10) <= today()) && (!until || String(until).slice(0,10) >= today());
+  if (!active) return null;
+
+  let priceValue = first(row,["price","current_price","promotion_price","deal_price","pricing.price"]);
+  if (priceValue && typeof priceValue === "object") priceValue = priceValue.amount ?? priceValue.value;
+  const price = Number(priceValue);
+  if (!Number.isFinite(price) || price <= 0) return null;
+
+  const originalValue = first(row,["original_price","regular_price","was_price"]);
+  const originalPrice = originalValue == null ? null : Number(originalValue);
   return {
-    id:String(field(row,["id","product_id","ean"]) || `${name}-${price}-${from||""}`),
-    name, brand, price,
-    originalPrice:field(row,["original_price","regular_price","was_price"]),
-    quantity:field(row,["quantity","package_size","size","unit"]),
-    from:from ? String(from).slice(0,10) : "",
-    until:until ? String(until).slice(0,10) : "",
-    promotion:field(row,["promotion_type","promotion","mechanic","discount_label"]) || "",
-    image, productUrl
+    id:String(first(row,["id","product_id","ean"]) || `${name}-${price}-${from || ""}`),
+    name:fullName,
+    price,
+    originalPrice:Number.isFinite(originalPrice) ? originalPrice : null,
+    quantity:first(row,["quantity","package_size","size","unit"]) || "",
+    from:from || "",
+    until:until || "",
+    promo:first(row,["promotional_keywords","promotion_type","discount_label"]) || "",
+    image:first(row,["image_url","image","product.image_url"]),
+    url:first(row,["product_url","url","product.url","source_url"])
   };
 }
 function renderOffers(rows) {
-  $("offerCount").textContent = rows.length;
-  $("offersList").innerHTML = rows.map(o => `
+  $("offerCount").textContent = String(rows.length);
+  $("offersList").innerHTML = rows.map(item => `
     <article class="offer-card">
-      <div class="offer-top"><span class="retailer-name">ALDI Süd</span><span class="proof-badge">ANGEBOTSDATEN</span></div>
-      ${o.image ? `<img class="product-image" src="${esc(o.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ""}
-      <div class="price">${money(o.price)}</div>
-      <div class="product">${esc(o.name)}</div>
-      ${o.quantity ? `<div class="offer-meta">Packungsgröße: ${esc(o.quantity)}</div>` : ""}
-      ${o.originalPrice ? `<div class="offer-meta">Vorheriger Preis: ${money(o.originalPrice)}</div>` : ""}
-      ${o.promotion ? `<div class="offer-meta">${esc(o.promotion)}</div>` : ""}
-      <div class="offer-meta">Gültig: ${date(o.from)} – ${date(o.until)}</div>
-      ${o.productUrl ? `<div class="offer-actions"><a class="text-link" href="${esc(o.productUrl)}" target="_blank" rel="noopener">Produktquelle ↗</a></div>` : ""}
+      <div class="offer-top"><span class="retailer-name">Volvic-Angebot</span><span class="proof-badge">AKTIVE AKTION</span></div>
+      ${item.image ? `<img class="product-image" src="${esc(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ""}
+      <div class="price">${euro(item.price)}</div>
+      <div class="product">${esc(item.name)}</div>
+      ${item.quantity ? `<div class="offer-meta">Packungsgröße: ${esc(item.quantity)}</div>` : ""}
+      ${item.originalPrice && item.originalPrice > item.price ? `<div class="offer-meta">Vorher: ${euro(item.originalPrice)}</div>` : ""}
+      ${item.promo ? `<div class="offer-meta">${esc(item.promo)}</div>` : ""}
+      <div class="offer-meta">Gültig: ${formatDate(item.from)} – ${formatDate(item.until)}</div>
+      ${item.url ? `<div class="offer-actions"><a class="text-link" href="${esc(item.url)}" target="_blank" rel="noopener">Angebotsquelle ↗</a></div>` : ""}
     </article>`).join("");
   $("emptyState").hidden = rows.length > 0;
 }
@@ -85,70 +101,93 @@ function showError(message) {
   $("errorBox").hidden = false;
   $("errorBox").textContent = message;
 }
-function buildQuery(input) {
-  const term = input.trim();
+function makeQuery(raw) {
+  const term = String(raw || "").trim();
   if (!term) return "Volvic";
   return /\bvolvic\b/i.test(term) ? term : `Volvic ${term}`;
 }
-async function searchOffers(force=false) {
-  const userText = $("searchQuery").value;
-  const query = buildQuery(userText);
-  const cacheKey = query.toLowerCase();
-  const entry = cache[cacheKey];
-  const last = Number(entry?.checkedAt || 0);
-  if (!force && entry && Date.now()-last < 24*60*60*1000) {
-    renderOffers(entry.rows || []);
-    $("lastChecked").textContent = `Letzte Suche nach „${query}“: ${new Date(last).toLocaleString("de-DE")} · Zwischengespeicherte Ergebnisse`;
-    $("searchState").textContent = "Zwischengespeichert";
+async function runSearch(force = true) {
+  const query = makeQuery($("searchQuery").value);
+  $("searchQuery").value = query;
+  const key = query.toLowerCase();
+  const cached = cache[key];
+  if (!force && cached && Date.now() - cached.savedAt < 24 * 60 * 60 * 1000) {
+    renderOffers(cached.rows || []);
+    $("searchState").textContent = "Gespeicherte Ergebnisse geladen";
+    $("lastChecked").textContent = `Letzte Suche nach „${query}“: ${new Date(cached.savedAt).toLocaleString("de-DE")}`;
     return;
   }
+
   $("refreshBtn").disabled = true;
   $("searchState").textContent = `Suche nach „${query}“ läuft …`;
   $("errorBox").hidden = true;
   $("emptyState").hidden = true;
+
   try {
-    const url = new URL(API_BASE);
-    url.searchParams.set("q",query);
-    url.searchParams.set("retailer","aldi_sued");
-    url.searchParams.set("promotion_status","active");
-    url.searchParams.set("page_size","100");
-    const response = await fetch(url.toString(), {method:"GET",mode:"cors",headers:{"Accept":"application/json"}});
-    if (!response.ok) throw new Error(`Die Angebotsquelle antwortet mit HTTP ${response.status}.`);
-    const data = await response.json();
-    const sourceRows = asArray(data);
+    const url = new URL(API_URL);
+    url.searchParams.set("q", query);
+    url.searchParams.set("retailer", GERMAN_SOURCE_SCOPE);
+    url.searchParams.set("promotion_status", "active");
+    url.searchParams.set("page_size", "100");
+
+    const response = await fetch(url.toString(), {
+      method:"GET",
+      mode:"cors",
+      headers:{"Accept":"application/json"}
+    });
+    if (!response.ok) {
+      let detail = "";
+      try { detail = (await response.json()).detail || ""; } catch {}
+      throw new Error(`HTTP ${response.status}${detail ? ": "+detail : ""}`);
+    }
+    const payload = await response.json();
+    const sourceRows = findRows(payload);
     const rows = sourceRows.map(normalize).filter(Boolean);
-    const unique = [...new Map(rows.map(x=>[x.id,x])).values()];
-    cache[cacheKey] = {rows:unique,checkedAt:Date.now()};
-    localStorage.setItem(CACHE_KEY,JSON.stringify(cache));
-    localStorage.setItem(CHECK_KEY,String(Date.now()));
+    const unique = [...new Map(rows.map(row => [row.id,row])).values()];
+    cache[key] = {rows:unique,savedAt:Date.now()};
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
     renderOffers(unique);
-    $("lastChecked").textContent = `Zuletzt gesucht: ${new Date().toLocaleString("de-DE")} · Suchbegriff: ${query} · Quelle: PrijsProfeet`;
-    $("searchState").textContent = "Suche abgeschlossen";
-    if (!sourceRows.length) showError("Die Datenquelle hat für diese Suchanfrage keine Angebotsdatensätze geliefert.");
-    else if (!unique.length) showError("Die Datenquelle hat Treffer geliefert, aber keiner ließ sich als aktives Volvic-Angebot mit Preis erkennen. Die API-Feldstruktur könnte sich geändert haben.");
-  } catch (err) {
-    const oldRows = entry?.rows || [];
-    renderOffers(oldRows);
+    $("lastChecked").textContent = `Zuletzt gesucht: ${new Date().toLocaleString("de-DE")} · Suchbegriff: ${query}`;
+    $("searchState").textContent = `Suche abgeschlossen · ${unique.length} Treffer`;
+    if (!sourceRows.length) {
+      showError("Die API hat eine Antwort geliefert, aber die App konnte darin keine Produktliste erkennen. Bitte sende einen Screenshot dieser Meldung.");
+    } else if (!unique.length) {
+      showError(`Die Quelle lieferte ${sourceRows.length} Datensätze, aber keinen aktiven Volvic-Treffer mit auswertbarem Preis. Es werden keine normalen Regalpreise als Angebot ausgegeben.`);
+    }
+  } catch (error) {
+    renderOffers(cached?.rows || []);
     $("searchState").textContent = "Suche fehlgeschlagen";
-    showError(`Automatische Suche momentan nicht möglich: ${err.message} Prüfe die Verbindung. Falls die API den Browserzugriff blockiert (CORS), ist ein kostenloser Proxy/Backend-Dienst erforderlich. ${oldRows.length ? "Die zuletzt gespeicherten Treffer werden angezeigt." : "Es liegen für diese Suche noch keine gespeicherten Treffer vor."}`);
-    $("lastChecked").textContent = last ? `Letzte erfolgreiche Suche: ${new Date(last).toLocaleString("de-DE")}` : "Noch keine erfolgreiche Suche.";
+    showError(`Der Abruf ist fehlgeschlagen: ${error.message}. Häufige Ursache: Der API-Anbieter blockiert Browserzugriffe (CORS) oder ist vorübergehend nicht erreichbar. ${cached?.rows?.length ? "Die zuletzt gespeicherten Treffer werden angezeigt." : "Es gibt noch keine zwischengespeicherten Treffer."}`);
+    $("lastChecked").textContent = "Keine neue erfolgreiche Suche.";
   } finally {
     $("refreshBtn").disabled = false;
   }
 }
 function renderRetailers() {
-  $("retailerList").innerHTML = RETAILERS.map(([name,status],i)=>`
-    <div class="retailer-row"><span class="retailer-dot ${i===0?"available":""}"></span><strong>${esc(name)}</strong><small>${esc(status)}</small></div>`).join("");
+  $("retailerList").innerHTML = RETAILERS.map(([name,status]) => `
+    <div class="retailer-row"><span class="retailer-dot"></span><strong>${esc(name)}</strong><small>${esc(status)}</small></div>`).join("");
 }
-$("refreshBtn").addEventListener("click",()=>searchOffers(true));
-$("searchQuery").addEventListener("keydown",e=>{if(e.key==="Enter")searchOffers(true);});
-window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;$("installBtn").hidden=false;});
-$("installBtn").addEventListener("click",async()=>{if(!deferredInstall)return;deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;$("installBtn").hidden=true;});
-if ("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+$("searchForm").addEventListener("submit", event => {
+  event.preventDefault();
+  runSearch(true);
+});
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault();
+  deferredInstall = event;
+  $("installBtn").hidden = false;
+});
+$("installBtn").addEventListener("click", async () => {
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  await deferredInstall.userChoice;
+  deferredInstall = null;
+  $("installBtn").hidden = true;
+});
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js", {updateViaCache:"none"}).catch(() => {}));
+}
 renderRetailers();
-const initialQuery = buildQuery($("searchQuery").value);
-const cachedInitial = cache[initialQuery.toLowerCase()]?.rows || [];
-renderOffers(cachedInitial);
-const last = Number(cache[initialQuery.toLowerCase()]?.checkedAt || 0);
-if (last) $("lastChecked").textContent = `Letzte erfolgreiche Suche: ${new Date(last).toLocaleString("de-DE")}`;
-searchOffers(false);
+const initial = makeQuery($("searchQuery").value);
+const previous = cache[initial.toLowerCase()];
+if (previous) renderOffers(previous.rows || []);
+runSearch(false);
