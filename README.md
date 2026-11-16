@@ -4,11 +4,11 @@ Installierbare Web-App für Android (Chrome → „Zum Startbildschirm“ / „A
 
 ## Was funktioniert
 - Anthrazit-, Limettengrün- und Gelb-Design
-- Angebotsliste für ausschließlich Volvic Eistee
+- Angebotsliste für alle Volvic-Produkte (z. B. Wasser, aromatisiertes Wasser und Eistee)
 - Such-PLZ und Umkreis lokal speichern
 - Quellenverzeichnis mit allen zehn Händlern
-- Direktlinks zu Prospektseiten und Websuche nach Volvic Eistee
-- Textprüfung: speichert nur wenn „Volvic“ UND „Eistee“ im Belegtext stehen
+- Direktlinks zu Prospektseiten und Websuche nach Volvic-Produkten
+- Textprüfung: akzeptiert Belegtexte mit „Volvic“; andere Marken werden ausgeschlossen
 - Manuelles Erfassen bestätigter Angebote mit Preis, Zeitraum, Filiale und Beleg-URL
 - Speicherung aller Angebote ausschließlich im lokalen Browser-Speicher
 - Offline-Cache für die App-Oberfläche

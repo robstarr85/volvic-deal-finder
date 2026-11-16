@@ -1,7 +1,7 @@
 {
   "name": "Volvic Deal Finder",
   "short_name": "Volvic Deals",
-  "description": "Belegte Volvic-Eistee-Sonderangebote lokal verwalten.",
+  "description": "Belegte Sonderangebote für alle Volvic-Produkte lokal verwalten.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

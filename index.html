@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#24282b">
-  <meta name="description" content="Volvic Eistee Sonderangebote finden und lokal speichern.">
+  <meta name="description" content="Sonderangebote für alle Volvic-Produkte finden und lokal speichern.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -16,7 +16,7 @@
     <div class="brand-mark">V</div>
     <div class="brand">
       <div class="brand-title">VOLVIC <span>DEAL FINDER</span></div>
-      <div class="tagline">Dein Eistee. Dein Angebot.</div>
+      <div class="tagline">Deine Volvic-Produkte. Deine Angebote.</div>
     </div>
     <button id="installBtn" class="icon-button" hidden aria-label="App installieren">＋</button>
   </header>
@@ -24,7 +24,7 @@
   <main>
     <section class="hero">
       <div class="eyebrow">DEIN ANGEBOTS-CHECK</div>
-      <h1>Nur Volvic Eistee.<br><em>Keine anderen Produkte.</em></h1>
+      <h1>Nur Volvic.<br><em>Alle Produkte.</em></h1>
       <p>Nachweisbare Sonderangebote aus den Prospekten deiner Supermärkte – ohne erfundene Preise.</p>
       <div class="location-row">
         <label class="field compact">
@@ -61,7 +61,7 @@
       <div id="emptyState" class="empty-state">
         <div class="empty-icon">🍋</div>
         <h3>Noch keine bestätigten Angebote</h3>
-        <p>Öffne die Prospekte unter „Supermärkte“. Wenn du dort Volvic Eistee als Aktion findest, kannst du den belegten Treffer hier erfassen.</p>
+        <p>Öffne die Prospekte unter „Supermärkte“. Wenn du dort ein Volvic-Produkt als Aktion findest, kannst du den belegten Treffer hier erfassen.</p>
         <button class="primary" data-go="sources">Prospekte öffnen</button>
       </div>
       <div class="note">
@@ -73,7 +73,7 @@
       <div class="section-head">
         <div><div class="eyebrow">10 HÄNDLER</div><h2>Prospekte prüfen</h2></div>
       </div>
-      <p class="intro">Die Quellen öffnen die aktuellen Prospekte oder Angebotsseiten. Die App liest diese Seiten nicht heimlich aus. Prüfe den Prospekt und erfasse nur echte Volvic-Eistee-Aktionen.</p>
+      <p class="intro">Die Quellen öffnen die aktuellen Prospekte oder Angebotsseiten. Die App liest diese Seiten nicht heimlich aus. Prüfe den Prospekt und erfasse nur echte Volvic-Aktionen.</p>
       <div id="sourceList" class="source-list"></div>
       <div class="note">
         RadarSuper veröffentlicht Prospekte für neun der hier gelisteten Ketten. Globus ist über einen Prospekt-Aggregator verlinkt. Die Verfügbarkeit einzelner regionaler Ausgaben kann variieren.
@@ -85,9 +85,9 @@
       <p class="intro">Trage einen Treffer aus einem Prospekt ein. Der Beleg-Link ist Pflicht. Normale Regalpreise sind nicht zulässig.</p>
 
       <label class="field full"><span>Text aus Prospekt / Webseite (optional zum Erkennen)</span>
-        <textarea id="sourceText" rows="3" placeholder="z. B. Volvic Eistee Pfirsich 1,5 l – 1,49 € – gültig 16.11. bis 21.11."></textarea>
+        <textarea id="sourceText" rows="3" placeholder="z. B. Volvic Naturell 1,5 l – 1,49 € – gültig 16.11. bis 21.11."></textarea>
       </label>
-      <button id="parseText" class="secondary full-button">Text auf Volvic Eistee prüfen</button>
+      <button id="parseText" class="secondary full-button">Text auf Volvic-Produkte prüfen</button>
       <div id="parseMessage" class="parse-message" role="status"></div>
 
       <form id="offerForm">
@@ -95,8 +95,8 @@
           <label class="field"><span>Supermarkt</span>
             <select id="retailer" required></select>
           </label>
-          <label class="field"><span>Geschmacksrichtung</span>
-            <input id="variant" required placeholder="z. B. Pfirsich">
+          <label class="field"><span>Produkt / Sorte</span>
+            <input id="variant" required placeholder="z. B. Naturell, Touch Zitrone, Eistee Pfirsich">
           </label>
           <label class="field"><span>Packungsgröße</span>
             <input id="size" placeholder="z. B. 1,5 l">
@@ -111,7 +111,7 @@
         </div>
         <label class="field full"><span>Filiale / Adresse</span><input id="storeName" required placeholder="REWE Musterstraße 1"></label>
         <label class="field full"><span>Beleg-Link (Prospekt / Händlerseite)</span><input id="sourceUrl" type="url" required placeholder="https://..."></label>
-        <label class="confirm-check"><input id="verifiedCheck" type="checkbox" required><span>Ich habe in der verlinkten Quelle geprüft, dass es sich um einen echten Volvic-Eistee-Aktionspreis handelt und dass Zeitraum und Filiale stimmen.</span></label>
+        <label class="confirm-check"><input id="verifiedCheck" type="checkbox" required><span>Ich habe in der verlinkten Quelle geprüft, dass es sich um einen echten Volvic-Aktionspreis handelt und dass Zeitraum und Filiale stimmen.</span></label>
         <button class="primary full-button" type="submit">Bestätigten Treffer lokal speichern</button>
       </form>
     </section>
