@@ -1,7 +1,7 @@
 {
   "name": "Volvic Deal Finder",
   "short_name": "Volvic Deals",
-  "description": "Automatische Suche nach aktuellen Volvic-Angeboten bei ALDI Süd.",
+  "description": "Automatische Suche nach aktuellen Volvic-Angeboten",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
